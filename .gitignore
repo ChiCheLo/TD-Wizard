@@ -56,3 +56,6 @@ crashlytics-build.properties
 
 # macOS
 .DS_Store
+
+# Claude Code — 本機專屬設定（CLAUDE.md 與 .claude/docs/ 仍須版控）
+.claude/settings.local.json
