@@ -33,14 +33,14 @@ these areas.
 - `UnityWebRequest` now uses **HTTP/2 by default**. If TD Wizard ever adds a backend/leaderboard
   call, don't assume HTTP/1.1-only server behavior when advising on request configuration.
 - **Multiplay Hosting** is no longer supported in Editor/runtime as of 6.3 (service itself
-  shuts down 2026-03-31). Not relevant to TD Wizard (single-player, no dedicated server
-  currently planned) but flagged in case multiplayer is ever scoped.
+  shuts down 2026-03-31). **Not applicable — TD Wizard is confirmed single-player
+  (decision 2026-09-11, see `production/NEXT-STEPS.md`).** Listed only so the constraint is
+  on record if that decision is ever revisited.
 
 ## UI
 
-- **Multiplayer Widgets are deprecated** in favor of "Unity Building Blocks." Not currently
-  relevant (TD Wizard has no multiplayer UI), but avoid recommending Multiplayer Widgets package
-  if multiplayer UI work ever starts.
+- **Multiplayer Widgets are deprecated** in favor of "Unity Building Blocks." Not applicable —
+  TD Wizard is single-player and has no multiplayer UI.
 
 ## Not Yet Verified
 

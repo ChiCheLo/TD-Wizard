@@ -5,6 +5,7 @@ Render Pipeline: URP (Universal Render Pipeline)
 Platform: PC / Steam (Windows primary)
 Language: C#
 Input: New Input System
+Network: **Single-player only — no netcode, no online services** (decision 2026-09-11)
 
 ---
 
@@ -87,6 +88,8 @@ Input: New Input System
 - No `GameObject.Find` / `FindObjectOfType` in runtime hot paths
 - No per-frame `GetComponent` calls — 快取於 `Awake`
 - No committing `Library/`, `Temp/`, `Logs/`, `*.csproj`, `*.slnx`
+- No networking / multiplayer / authority-check scaffolding — 本作為純單機，**不為多人預留架構**。
+  邏輯與表現分離是為了可測試性，不是為了 netcode。
 
 ---
 
