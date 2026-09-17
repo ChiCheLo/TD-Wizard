@@ -27,28 +27,39 @@
 | **概念設計** | **`design/gdd/game-concept.md`** — 支柱、核心循環、MVP、範圍分層、風險 |
 | **美術聖經** | **`design/art/art-bible.md`** — 9 節完整：視覺規則、色彩系統、資產標準 |
 | **系統索引** | **`design/gdd/systems-index.md`** — 32 系統、相依分層、設計順序、進度追蹤 |
+| 概念審查 | `design/gdd/reviews/game-concept-review-log.md` — 2 阻擋項 + 3 建議項已修訂，並修正連攜機制三層理解錯誤 |
 
 ---
 
 ## ➡️ 下一步
 
 ```
-/create-architecture
+/design-system 寶石嵌合系統
 ```
 
-**為什麼是這個**：系統清單與相依關係已經定了，接下來要產出**技術架構藍圖**
-與必要的 ADR 清單，決定這些系統在程式碼裡怎麼組織。
+**為什麼是這個**：`/create-architecture` 曾於 2026-09-16 啟動，但在 Phase 0
+發現**沒有任何系統 GDD**（0/32），架構將缺乏具體技術需求可依據，因此暫停。
 
-架構定案前不要開始寫系統 GDD 或程式碼——`CLAUDE.md` 的「架構核心」目前
-仍是「尚未定義」，那條規則要求架構先行。
+正確順序是**先寫核心系統 GDD，再做架構**。標準路線（Path A）本來就是
+`map-systems → design-system → create-architecture`。
 
-**架構階段要處理的關鍵決策**（已由 `/map-systems` 識別）：
+**建議依設計順序撰寫前五個核心系統**（見 systems-index §6）：
+
+```
+1. 事件匯流排        ← 所有系統的骨幹，但可與架構一併處理
+2. 塔系統
+3. 敵人系統 / 傷害計算
+4. 寶石嵌合 ★        ← 內容軸，建議從這裡開始
+5. 連攜系統 ★        ← 本作招牌，第一號風險所在
+```
+
+寫完核心系統 GDD 後，再回頭執行 `/create-architecture`。
+
+**架構階段待處理的關鍵決策**（已由 `/map-systems` 識別，屆時使用）：
 - 事件匯流排的實作方式（所有系統的溝通骨幹）
 - `ISaveable` 序列化契約
 - MaterialPropertyBlock 破損材質（art-bible §8 硬規則）
 - URP Render Graph 遮擋描邊
-
-之後才是 `/design-system` 逐個撰寫 GDD（順序見 systems-index §6）。
 
 ---
 
@@ -74,13 +85,15 @@
 ✅ /brainstorm            game-concept.md 已產出
 ✅ /art-bible             art-bible.md 已產出（9 節完整）
 ✅ /map-systems           systems-index.md 已產出（32 系統）
-⬜ /create-architecture   ← 下一步。架構藍圖與 Required ADR 清單
+✅ /design-review         game-concept.md 已審查並修訂（含連攜機制三層修正）
+⬜ /design-system (×N)    ← 下一步。逐系統寫 GDD（順序見 systems-index §6）
+⬜ /review-all-gdds       跨系統一致性檢查
+⬜ /prototype --spike     驗證連攜技能 UI 的手感（第一號風險）
+───────────────────────── 系統設計完成後 ─────────────────────────
+⬜ /create-architecture   架構藍圖與 Required ADR 清單（曾啟動，因缺 GDD 而暫停）
 ⬜ /architecture-decision (×N)    逐項記錄架構決策
 ⬜ /create-control-manifest       彙整成可執行的規則表
 ⬜ /architecture-review           架構覆蓋率驗證
-───────────────────────── 以下回到設計 ─────────────────────────
-⬜ /design-system (×N)    逐系統寫 GDD（順序見 systems-index §6）
-⬜ /review-all-gdds       跨系統一致性檢查
 ⬜ /gate-check            階段關卡驗證
 ⬜ /ux-design → /vertical-slice → /create-epics → /create-stories → /sprint-plan
 ⬜ /dev-story (×N)        進入實作
