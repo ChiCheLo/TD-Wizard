@@ -26,18 +26,29 @@
 | 專案守則 | `CLAUDE.md` |
 | **概念設計** | **`design/gdd/game-concept.md`** — 支柱、核心循環、MVP、範圍分層、風險 |
 | **美術聖經** | **`design/art/art-bible.md`** — 9 節完整：視覺規則、色彩系統、資產標準 |
+| **系統索引** | **`design/gdd/systems-index.md`** — 32 系統、相依分層、設計順序、進度追蹤 |
 
 ---
 
 ## ➡️ 下一步
 
 ```
-/map-systems
+/create-architecture
 ```
 
-**為什麼是這個**：把概念拆解成個別系統並釐清相依關係，
-產出 `design/gdd/systems-index.md`。有了系統清單，
-才能用 `/design-system` 逐個撰寫 GDD。
+**為什麼是這個**：系統清單與相依關係已經定了，接下來要產出**技術架構藍圖**
+與必要的 ADR 清單，決定這些系統在程式碼裡怎麼組織。
+
+架構定案前不要開始寫系統 GDD 或程式碼——`CLAUDE.md` 的「架構核心」目前
+仍是「尚未定義」，那條規則要求架構先行。
+
+**架構階段要處理的關鍵決策**（已由 `/map-systems` 識別）：
+- 事件匯流排的實作方式（所有系統的溝通骨幹）
+- `ISaveable` 序列化契約
+- MaterialPropertyBlock 破損材質（art-bible §8 硬規則）
+- URP Render Graph 遮擋描邊
+
+之後才是 `/design-system` 逐個撰寫 GDD（順序見 systems-index §6）。
 
 ---
 
@@ -62,13 +73,15 @@
 ✅ /setup-engine          Unity 6.3 已釘、參考文件已建
 ✅ /brainstorm            game-concept.md 已產出
 ✅ /art-bible             art-bible.md 已產出（9 節完整）
-⬜ /map-systems           ← 下一步。拆解系統與相依關係
-⬜ /design-review design/gdd/game-concept.md    驗證概念完整性
-⬜ /design-system (×N)    逐系統寫 GDD
+✅ /map-systems           systems-index.md 已產出（32 系統）
+⬜ /create-architecture   ← 下一步。架構藍圖與 Required ADR 清單
+⬜ /architecture-decision (×N)    逐項記錄架構決策
+⬜ /create-control-manifest       彙整成可執行的規則表
+⬜ /architecture-review           架構覆蓋率驗證
+───────────────────────── 以下回到設計 ─────────────────────────
+⬜ /design-system (×N)    逐系統寫 GDD（順序見 systems-index §6）
 ⬜ /review-all-gdds       跨系統一致性檢查
-⬜ /gate-check            進入架構階段前的關卡驗證
-───────────────────────── 以上為 Concept 階段 ─────────────────────────
-⬜ /create-architecture → /architecture-decision (×N) → /create-control-manifest → /architecture-review
+⬜ /gate-check            階段關卡驗證
 ⬜ /ux-design → /vertical-slice → /create-epics → /create-stories → /sprint-plan
 ⬜ /dev-story (×N)        進入實作
 ```
