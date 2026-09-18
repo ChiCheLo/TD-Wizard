@@ -1,0 +1,259 @@
+# TD Wizard — Entity Registry
+#
+# 跨 GDD 的事實登錄表。這裡的每個值都是「已被某份 GDD 定案」的事實。
+#
+# 用途：撰寫新 GDD 時，/design-system 會先讀此檔。若新 GDD 寫出與此處不同的值，
+#       會當場示警，而非等到 /consistency-check 才發現漂移。
+#
+# 規則：
+#   - source        = 定義此項目的 GDD（唯一真實來源，只有它能改值）
+#   - referenced_by = 引用此項目的其他 GDD（不可自行變更值）
+#   - 要改值必須回到 source GDD 修改，並同步檢查所有 referenced_by
+#
+# 最後更新：2026-09-18
+
+version: 1
+
+items:
+
+  # ─────────────────────────────────────────────
+  # 寶石（實例制，每顆各自持有等級）
+  # ─────────────────────────────────────────────
+
+  - name: 火
+    type: gem
+    gem_name: 爐心石
+    hue_slot: H1
+    hue: "橙紅 25°"
+    attack_type: 區域
+    targeting: 射程內隨機敵人
+    mechanic: 週期性投放固定範圍燃燒區，持續數秒
+    attack_speed: 中
+    stack_rule: 可疊加，上限 3 層
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: 霜
+    type: gem
+    gem_name: 凍泉晶
+    hue_slot: H4
+    hue: "青 190°"
+    attack_type: 區域
+    targeting: 射程最前緣（固定位置）
+    mechanic: 持續維持減速場，敵人進入時受一次性傷害
+    attack_speed: 持續
+    stack_rule: 減速不疊加取最高；一次性傷害每次進入新場皆觸發
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: 雷
+    type: gem
+    gem_name: 鐘鳴石
+    hue_slot: H2
+    hue: "黃 55°"
+    attack_type: 指向
+    targeting: 第一隻 → 跳躍
+    mechanic: 鏈式跳彈，可重複命中同一目標
+    attack_speed: 中
+    stack_rule: 總跳躍次數上限 4，每跳衰減
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: 風
+    type: gem
+    gem_name: 風信石
+    hue_slot: H3
+    hue: "綠 130°"
+    attack_type: 指向
+    targeting: 最前排數隻
+    mechanic: 群體小幅擊退，距離隨機
+    attack_speed: 快
+    stack_rule: 擊退不疊加，同時命中僅套用一次
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: 蝕
+    type: gem
+    gem_name: 鏽紋紫晶
+    hue_slot: H5
+    hue: "紫 285°"
+    attack_type: 指向
+    targeting: 固定第一隻，不越位
+    mechanic: 單體重擊，附加穿甲 debuff
+    attack_speed: 慢
+    stack_rule: 穿甲可疊加，受 25% 下限約束
+    source: gem-socketing.md
+    referenced_by: []
+
+  # ─────────────────────────────────────────────
+  # 公式
+  # ─────────────────────────────────────────────
+
+  - name: FinalDamage
+    type: formula
+    expression: "BaseDamage × LevelMult × AffinityMult × (1 − ArmorReduction)"
+    variables: [BaseDamage, LevelMult, AffinityMult, ArmorReduction]
+    output_range: "0.5625× – 1.8×（相對於 BaseDamage）"
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: EffectiveArmor
+    type: formula
+    expression: "max(BaseArmor × 0.25, BaseArmor − ΣPenetration)"
+    variables: [BaseArmor, ΣPenetration]
+    output_range: "BaseArmor × 0.25 – BaseArmor"
+    note: 穿甲存在硬性下限，超出部分浪費（刻意的邊際遞減）
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: JumpDamage
+    type: formula
+    expression: "BaseDamage × 0.8^n （n = 跳躍序號，初擊 n=0）"
+    variables: [BaseDamage, n]
+    output_range: "總和上限 3.362 × BaseDamage"
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: KnockbackDistance
+    type: formula
+    expression: "BaseKnockback × Random(0.6, 1.4)"
+    variables: [BaseKnockback]
+    output_range: "0.6× – 1.4× BaseKnockback"
+    source: gem-socketing.md
+    referenced_by: []
+
+  # ─────────────────────────────────────────────
+  # 常數（下游 GDD 不可牴觸）
+  # ─────────────────────────────────────────────
+
+  - name: WeaknessMult
+    type: constant
+    value: 1.5
+    unit: 倍率
+    note: 打中弱點屬性時的傷害倍率
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: ResistMult
+    type: constant
+    value: 0.75
+    unit: 倍率
+    note: 打中抗性屬性時的傷害倍率。刻意小於 WeaknessMult 的對稱值（獎勵大於懲罰）
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: NeutralMult
+    type: constant
+    value: 1.0
+    unit: 倍率
+    note: 無屬性關聯時的倍率。基礎塔（無寶石）恆為此值
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: LevelMult_Lv1
+    type: constant
+    value: 1.0
+    unit: 倍率
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: LevelMult_Lv2
+    type: constant
+    value: 1.2
+    unit: 倍率
+    note: 刻意不足以壓過屬性選擇（Lv1 打弱點 1.5 > Lv2 打抗性 0.9）
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: ArmorFloorRatio
+    type: constant
+    value: 0.25
+    unit: 比例
+    note: 防禦力永不低於原始值的 25%
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: ArmorReductionCap
+    type: constant
+    value: 0.75
+    unit: 比例
+    note: 傷害減免上限。確保無實質免疫（呼應反支柱⑤）
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: FireStackCap
+    type: constant
+    value: 3
+    unit: 層
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: ChainJumps
+    type: constant
+    value: 4
+    unit: 次
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: ChainFalloff
+    type: constant
+    value: 0.8
+    unit: 倍率/跳
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: KnockbackVariance
+    type: constant
+    value: 0.4
+    unit: "±比例"
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: FusionCost
+    type: constant
+    value: 3
+    unit: 顆
+    note: 3 顆同屬性 Lv1 → 1 顆 Lv2（消耗）
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: SocketCost_C
+    type: constant
+    value: 0.6
+    unit: 建造費的倍數
+    note: 嵌入費。準備期取下全額退還，戰鬥期不退還
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: GemDropPerLevel
+    type: constant
+    value: 2
+    unit: 顆/關
+    note: 原型階段的暫定方案，未來改為抽卡取得
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: InitialGemCount
+    type: constant
+    value: 3
+    unit: 顆
+    note: 3 種各 1 顆。確保第一關即可發動連攜
+    source: gem-socketing.md
+    referenced_by: []
+
+  - name: TowerSocketSlots
+    type: constant
+    value: 1
+    unit: 槽
+    note: 每座塔僅一個插槽
+    source: gem-socketing.md
+    referenced_by: []
+
+# ─────────────────────────────────────────────
+# 待登錄（其他 GDD 撰寫後補入）
+# ─────────────────────────────────────────────
+#
+# 敵人系統：Armor、WeakAttribute、ResistAttribute 的欄位定義與各敵人數值
+# 傷害計算：ArmorReduction 由 EffectiveArmor 換算的公式
+# 塔系統：基礎塔的 BaseDamage、射程、基準攻速
+# 連攜系統：各連攜技的起點/終點屬性、節點數、效果

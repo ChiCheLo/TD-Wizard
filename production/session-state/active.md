@@ -1,23 +1,48 @@
 # Active Session State
 
-> 最後更新：2026-09-15
+> 最後更新：2026-09-18
 
 | 欄位 | 內容 |
 |---|---|
-| **Task** | Systems decomposition |
-| **Status** | Systems index created |
-| **File** | `design/gdd/systems-index.md` |
-| **Next** | Design individual system GDDs |
+| **Task** | 寶石嵌合系統 GDD |
+| **Status** | **Complete**（待 `/design-review`） |
+| **File** | `design/gdd/gem-socketing.md`（427 行，12 節全滿） |
+| **Sections** | 全部完成，無殘留佔位符 |
+| **Next** | `/design-review design/gdd/gem-socketing.md`（**須於全新 session 執行**） |
+
+## 本次產出
+
+| 檔案 | 內容 |
+|---|---|
+| `design/gdd/gem-socketing.md` | 寶石嵌合系統完整 GDD |
+| `design/registry/entities.yaml` | **新建**。5 寶石 + 4 公式 + 16 常數 |
+| `design/gdd/systems-index.md` | 進度 1/32；新增 4 條下游約束、2 個待解問題 |
 
 ## 進度
 
-- 32 個系統已列舉並分層
-- 3 個循環依賴已識別並解決（ISaveable、Event Bus、單向依賴）
-- MVP 27 個 / v1.0 4 個
-- 0 / 32 GDD 已撰寫
+- 系統 GDD：**1 / 32**（寶石嵌合）
+- 設計順序中已完成：第 5 位（提前撰寫，因其為內容軸）
+
+## 本次確立的關鍵設計
+
+- 塔僅 **1 槽**；**基礎塔未嵌合仍可攻擊**（單體、索敵第一隻、無屬性）
+- 寶石採**實例制**，每顆各持等級；可同時擁有同屬性多顆不同等級
+- 升級採**融合**：3 顆同屬性 Lv1 → 1 顆 Lv2（消耗）
+- 嵌合**需付費 `C`**；準備期取下全額退還、戰鬥期不退還
+- 五屬性行為：火（區域燃燒）、霜（減速場）、雷（跳彈可重複，每跳 −20%）、
+  風（群體擊退，距離隨機不疊加）、蝕（固定第一隻，穿甲下限 25%）
+- 剋制：弱點 ×1.5、抗性 ×0.75，**互斥不同時觸發**
+
+## ⚠️ 傳給下游的硬約束
+
+1. **敵人須新增「防禦力」概念**（`Armor`、`WeakAttribute`、`ResistAttribute`）
+2. **關卡的敵人抗性 × 挑戰禁用項，須至少留下兩種可行屬性解**——否則產生不可達成的星星
 
 ## 下一個該設計的系統
 
-**事件匯流排**（設計順序第 1 位，L0 基礎層，瓶頸系統）
+依 systems-index §6 設計順序，尚未設計且優先度最高者：
 
-執行 `/design-system 事件匯流排` 或 `/map-systems next`
+**事件匯流排**（順序第 1 位，L0 基礎層，瓶頸系統）
+或 **連攜系統**（順序第 6 位，★ 高複雜度，第一號風險所在）
+
+> 建議：連攜系統直接依賴寶石嵌合的屬性定義，趁上下文還熱時撰寫較有效率。
