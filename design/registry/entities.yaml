@@ -96,7 +96,10 @@ items:
     type: formula
     expression: "BaseDamage × LevelMult × AffinityMult × (1 − ArmorReduction)"
     variables: [BaseDamage, LevelMult, AffinityMult, ArmorReduction]
-    output_range: "0.5625× – 1.8×（相對於 BaseDamage）"
+    output_range: "0.1875× – 1.8×（相對於 BaseDamage）"
+    note: >
+      下限 0.1875 = Lv1(1.0) × 被剋(0.75) × 護甲減免上限(1−0.75=0.25)。
+      2026-09-20 更正——舊值 0.5625 只算到「高防但非上限」的中間情況，未推到 ArmorReductionCap 的真正下限
     source: gem-socketing.md
     referenced_by: []
 
@@ -150,11 +153,27 @@ items:
     source: gem-socketing.md
     referenced_by: []
 
+  - name: AttributeExposureRate
+    type: constant
+    value: 0.3
+    unit: 比例（持有 BaseAttribute 的敵人佔比）
+    note: >
+      多數敵人 BaseAttribute = null，約三成持有屬性（特殊怪／菁英／頭目）。
+      2026-09-20 第 3 輪審查定案。屬性因此是「事件」而非背景噪音，呼應支柱③；
+      並大幅降低「至少兩種可行屬性解」的死局風險。
+      ⚠️ 提高此值會同時放大死局風險與剋制的決策權重，須連帶重審關卡驗證規則。
+    source: gem-socketing.md
+    referenced_by: []
+
   - name: WeaknessMult
     type: constant
     value: 1.5
     unit: 倍率
-    note: 攻擊屬性剋敵人屬性時的傷害倍率
+    note: >
+      攻擊屬性剋敵人屬性時的傷害倍率。
+      ⚠️ 不可為了「讓剋制更有感」而調高——此值受 LevelMult 約束，
+      必須同時滿足 Lv1 剋制(1.50) > Lv2 中立(1.20) 與 Lv1 剋制(1.50) > Lv2 被剋(0.90)，
+      動它會破壞 game-concept §4.1「等級不可輾壓屬性選擇」的驗算
     source: gem-socketing.md
     referenced_by: []
 
@@ -269,7 +288,9 @@ items:
     type: constant
     value: 3
     unit: 顆
-    note: 3 種各 1 顆。確保第一關即可發動連攜
+    note: >
+      3 種各 1 顆，種類固定為 火、霜、風（2026-09-20 依 MVP 三個連攜技的配方回填）。
+      不可隨機選取——此三種恰好湊得出全部三個 MVP 連攜技
     source: gem-socketing.md
     referenced_by: []
 
@@ -319,6 +340,81 @@ items:
     note: >
       領域落點的可釋放範圍。巫師的座標是圓心計算的一部分，因此站位不只決定
       「能不能放」，更決定「能放到哪」。巫師往前走，圓就往前移
+    source: game-concept.md
+    referenced_by: []
+
+  # ─────────────────────────────────────────────
+  # MVP 連攜技（game-concept §3.2 定案，細部數值待連攜系統 GDD）
+  #
+  # ⚠️ targeting / uses_cast_circle / phase_advance 是**逐技能宣告的自由欄位**，
+  #    不是分類系統。不可據此建立列舉型別——每招都是獨立的表現方式，
+  #    v1.0 擴到 10+ 招時會出現這三欄無法描述的形態。
+  # ─────────────────────────────────────────────
+
+  - name: StartingGemTypes
+    type: constant
+    value: [火, 霜, 風]
+    unit: 屬性種類
+    note: >
+      起始 3 顆寶石的固定種類。由 MVP 三個連攜技的配方反推——
+      此三種恰好湊得出全部三個技能。雷與蝕在 MVP 無對應連攜技（3 技能的數學極限）
+    source: game-concept.md
+    referenced_by: [gem-socketing.md]
+
+  - name: 炎寒領域
+    type: chain_skill
+    direction: 霜 → 火
+    targeting: 地面區域
+    uses_cast_circle: true
+    phase_advance: 計時自動
+    recipe: {霜: 1, 火: 1}
+    phases:
+      - {duration: 2.0, effect: "暴風雪——賦予經過的敵人霜屬性 ＋ 緩速"}
+      - {duration: 2.0, effect: "火海——火剋霜 ×1.5，額外造成巫師基本傷害的一定 %"}
+    role: 爆發傷害
+    cognition: 反應型
+    uses_affinity_combo: true
+    source: game-concept.md
+    referenced_by: []
+
+  - name: 凍土
+    type: chain_skill
+    direction: 火 → 霜
+    targeting: 地面區域
+    uses_cast_circle: true
+    phase_advance: 計時自動（階段2 為 t=2.0 的瞬間快照）
+    recipe: {火: 1, 霜: 1}
+    phases:
+      - {duration: 2.0, effect: "熔岩——經過者受灼燒。此技能唯一的傷害來源"}
+      - {duration: 1.5, effect: "冷卻成岩石——以 t=2.0 快照判定，當下站在熔岩上的敵人定身 1.5 秒"}
+    role: 灼燒 ＋ 硬控
+    cognition: 預判型
+    uses_affinity_combo: false
+    note: >
+      走「火剋霜」的反方向，階段2 打不出剋制，故刻意不依賴傷害。
+      定身期間受攻擊不解除（可解除等於在塔防裡自廢）。
+      岩石僅地面視覺變化，不阻擋路徑，未被控到的敵人照常通行
+    source: game-concept.md
+    referenced_by: []
+
+  - name: 星星之火
+    type: chain_skill
+    direction: 火 → 風
+    targeting: 單一敵人
+    uses_cast_circle: false
+    phase_advance: 條件觸發（遭受風屬性攻擊），時間不確定
+    recipe: {火: 1, 風: 1}
+    phases:
+      - {duration: 有時限（待定）, effect: "準心遠距離點燃一隻敵人，進入「火種」狀態。不受落點圓約束"}
+      - {duration: 5.0, effect: "遭受風屬性攻擊時觸發——引爆為大火，對其自身與路徑後方一定距離內的敵人造成 5 秒灼燒"}
+    role: 延遲引爆
+    cognition: 佈局型
+    uses_affinity_combo: false
+    note: >
+      「火種」是獨立標記，**不是 AppliedAttribute**——不寫入屬性欄位，
+      故不會讓蝕塔額外吃 ×1.5，也不會覆寫菁英怪的原生屬性。
+      階段2 由條件觸發，時間不確定，可能永不觸發（火種過期消失）。
+      ⚠️ 準心不受落點圓約束，是「拿支柱②換支柱①」的刻意交換，見 game-concept §3.2
     source: game-concept.md
     referenced_by: []
 
