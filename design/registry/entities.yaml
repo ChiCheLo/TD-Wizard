@@ -138,11 +138,23 @@ items:
   # 常數（下游 GDD 不可牴觸）
   # ─────────────────────────────────────────────
 
+  - name: AffinityRing
+    type: constant
+    value: "Fire → Frost → Lightning → Wind → Eclipse → Fire"
+    unit: 相剋環
+    note: >
+      五屬性相剋環。箭頭方向為「剋」。每個屬性剋一個、被一個剋，其餘中立。
+      2026-09-20 新增，取代原本敵人各自持有的 WeakAttribute / ResistAttribute 模型
+      ——連攜技能需要「賦予敵人屬性後用剋制屬性打」的元素間關係，舊模型無法表達。
+      互斥性由環的結構自帶：任兩屬性間至多一個方向的剋制關係。
+    source: gem-socketing.md
+    referenced_by: []
+
   - name: WeaknessMult
     type: constant
     value: 1.5
     unit: 倍率
-    note: 打中弱點屬性時的傷害倍率
+    note: 攻擊屬性剋敵人屬性時的傷害倍率
     source: gem-socketing.md
     referenced_by: []
 
@@ -150,7 +162,7 @@ items:
     type: constant
     value: 0.75
     unit: 倍率
-    note: 打中抗性屬性時的傷害倍率。刻意小於 WeaknessMult 的對稱值（獎勵大於懲罰）
+    note: 敵人屬性剋攻擊屬性時的傷害倍率。刻意小於 WeaknessMult 的對稱值（獎勵大於懲罰）
     source: gem-socketing.md
     referenced_by: []
 
@@ -158,7 +170,7 @@ items:
     type: constant
     value: 1.0
     unit: 倍率
-    note: 無屬性關聯時的倍率。基礎塔（無寶石）恆為此值
+    note: 環上無剋制關係時的倍率。基礎塔（無寶石）與無屬性敵人恆為此值
     source: gem-socketing.md
     referenced_by: []
 
@@ -269,11 +281,54 @@ items:
     source: gem-socketing.md
     referenced_by: []
 
+  # ─────────────────────────────────────────────
+  # 連攜系統（game-concept §3.2 定案，待連攜系統 GDD 補齊細部數值）
+  # ─────────────────────────────────────────────
+
+  - name: CastModeCancelRules
+    type: constant
+    value: "移動 → 取消；受擊 → 取消；皆無代價"
+    unit: 規則
+    note: 施法模式（選落點階段）的取消條件。取消不進 CD、不損失資源
+    source: game-concept.md
+    referenced_by: []
+
+  - name: CastWindup
+    type: constant
+    value: 0.3
+    unit: 秒
+    note: 確認施放後的前搖。此期間可被攻擊打斷 → 短僵直，技能不進 CD。前搖結束後進入霸體
+    source: game-concept.md
+    referenced_by: []
+
+  - name: CastModeDwellBudget
+    type: constant
+    value: 1.0
+    unit: 秒（上限）
+    note: >
+      硬性設計約束——施法模式的目標停留時間。由於受擊即取消，若選落點需要仔細瞄準，
+      連攜會在怪群密集時最難放出來。準心預設落點須一進入施法模式就是合理解。
+      須由 /prototype --spike 實測驗證
+    source: game-concept.md
+    referenced_by: []
+
+  - name: CastCircle
+    type: formula
+    expression: "圓心 = centroid(參與塔..., 巫師)；半徑 = max(參與塔的攻擊半徑)"
+    variables: [參與塔座標, 巫師座標, 各塔攻擊半徑]
+    note: >
+      領域落點的可釋放範圍。巫師的座標是圓心計算的一部分，因此站位不只決定
+      「能不能放」，更決定「能放到哪」。巫師往前走，圓就往前移
+    source: game-concept.md
+    referenced_by: []
+
 # ─────────────────────────────────────────────
 # 待登錄（其他 GDD 撰寫後補入）
 # ─────────────────────────────────────────────
 #
-# 敵人系統：Armor、WeakAttribute、ResistAttribute 的欄位定義與各敵人數值
-# 傷害計算：ArmorReduction 由 EffectiveArmor 換算的公式
+# 敵人系統：Armor、BaseAttribute、AppliedAttribute 的欄位定義與各敵人數值
+# 傷害計算：ArmorReduction 由 EffectiveArmor 換算的公式；Counters() 相剋環查詢
 # 塔系統：基礎塔的 BaseDamage、射程、基準攻速
-# 連攜系統：各連攜技的起點/終點屬性、節點數、效果
+# 連攜系統：各連攜技的配方（屬性 × 固定數量）、階段順序與時長、效果、CD
+# 巫師能力：巫師基本傷害（MVP 為固定常數，連攜 %數傷害以此為基準單位）
+# 裝備系統（v1.0）：等級層級、掉落權重、巫師基本傷害的成長曲線

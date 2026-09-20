@@ -4,69 +4,74 @@
 
 | 欄位 | 內容 |
 |---|---|
-| **Task** | 寶石嵌合系統 GDD — 審查後修訂與收尾 |
-| **Status** | **Complete**（兩輪 `/design-review` 皆已處理完畢） |
-| **File** | `design/gdd/gem-socketing.md` |
-| **Next** | `/design-system 連攜系統`（設計順序第 6 位，**須於全新 session 執行**） |
+| **Task** | 連攜系統的上游文件改版 |
+| **Status** | **Complete** — 五份上游文件已改完 |
+| **Next** | 使用者將重跑 `/design-review`（**須於全新 session 執行**） |
 
-## 本次處理
+## 為什麼要改上游
 
-第二輪 `/design-review` 的結果（1 項阻擋 + 4 項建議），加上審查未涵蓋但同時發現的
-登錄表漂移，全部處理完畢。
+連攜系統的機制在設計討論中確立，結果**推翻了兩份已定案文件的核心模型**：
 
-| # | 項目 | 檔案 |
+1. **連攜不是鏈路** — 塔是**配方材料**，效果落在準心指定區域生成的**領域**。
+   不存在「起點塔 → 巫師 → 終點塔」的有向光帶。
+2. **屬性剋制改為五屬性相剋環** — 取代敵人各自持有的天生弱點／抗性。
+
+`/design-system` 會把 game-concept、systems-index、entities.yaml 當成已定案事實讀入。
+不先改乾淨，寫出來的連攜 GDD 會建立在錯的前提上。
+
+## 已確認的連攜設計（11 項）
+
+| # | 項目 | 決定 |
 |---|---|---|
-| 1 | `FusionCost` 3 → 2（登錄表漂移修正） | `design/registry/entities.yaml` |
-| 2 | §4.3 鐵則加入限定：不涵蓋敵人抗性佈局 | `design/gdd/game-concept.md` |
-| 3 | 火的層數驅逐明確定義為**持續重估**（非建立時快照） | `gem-socketing.md` |
-| 4 | 風的「同時」定義為**同一次傷害結算批次** | `gem-socketing.md` |
-| 5 | 新增〈融合的取捨驗算〉——改用正確的對照組 | `gem-socketing.md` |
-| 6 | 新增 3 條 AC（火中途驅逐與遞補、風跨批次） | `gem-socketing.md` |
-| 7 | 建立審查記錄（補記第一、二輪） | `design/gdd/reviews/gem-socketing-review-log.md` |
-| 8 | 進度改為 Reviewed；§8 約束補上 §4.3 的限定 | `design/gdd/systems-index.md` |
+| 1 | 模型 | 塔是**材料**，效果落在準心指定區域。**不是鏈路** |
+| 2 | 方向性 | ＝**順序**。起點屬性先發生，終點屬性後發生 |
+| 3 | 施放條件 | 範圍內有配方要求的塔 |
+| 4 | 塔的數量 | **固定數量要求**；MVP 配方全用 ×1 |
+| 5 | 屬性 | **五屬性相剋環** `火→霜→雷→風→蝕→火`，取代天生弱點／抗性 |
+| 6 | 落點圓 | 圓心＝參與塔與巫師的幾何中點；半徑＝射程最長塔的攻擊半徑 |
+| 7 | 施法模式 | 按技能進入，不能動；移動取消、受擊取消，皆無代價 |
+| 8 | 前搖 | 確認後 0.3 秒可被打斷 → **短僵直，不進 CD** |
+| 9 | 霸體 | 前搖後不可打斷 |
+| 10 | 巫師傷害 | MVP 固定常數；**裝備系統列入 v1.0** |
+| 11 | 技能樹 | 可重複投點的「連攜精通」節點，每級小幅 % |
 
-## ⚠️ 已知流程缺口（下次審查務必注意）
+MVP 範例技能「炎寒領域」（火 → 霜）：暴風雪 2 秒賦予霜屬性 → 火海 2 秒以火剋霜打剋制傷害，
+外加巫師基本傷害的一定 %數。
 
-**`/design-review` 不比對 `design/registry/entities.yaml`。**
-它比對 GDD 與 GDD，不比對 GDD 與 registry。第一輪審查把 `FusionCost` 從 3 改成 2，
-但沒回頭同步登錄表，兩輪之間漂移了整整一份文件的時間。
+## 本次改動的五份文件
 
-**審查後的收尾有三步，缺一不可**：
-1. 寫 `design/gdd/reviews/[system]-review-log.md`
-2. 更新 `systems-index.md` §7 狀態與總進度
-3. **同步 `entities.yaml`**（或補跑 `/consistency-check`）
+| 檔案 | 改了什麼 |
+|---|---|
+| `game-concept.md` | §3.1 核心循環（站位的兩層意義）、**§3.2 連攜整段重寫**、§3.5 新增可疊加節點例外、§10 MVP 規格、§11 裝備進 v1.0 |
+| `gem-socketing.md` | 新增〈屬性相剋環〉章節、介面契約改寫、Edge Cases 改寫、術語統一（弱點／抗性 → 剋制／被剋） |
+| `art-bible.md` | **§7 連攜提示整段重寫**（鏈路預覽作廢 → 落點圓）、§2 Peak 範圍澄清、§5 姿態庫新增施法模式與被打斷、亮度階層改寫 |
+| `entities.yaml` | 新增 `AffinityRing` 與 4 筆連攜常數、倍率 note 改寫、待登錄清單更新 |
+| `systems-index.md` | 32 → **34 系統**（新增動畫系統 #33、裝備系統 #34）、#3 與 #21 描述重寫、§8 新增 6 條約束、§9 新增 3 個待解問題 |
 
-第一輪三步全漏。
+## ⚠️ gem-socketing 需要重新審查
 
-## 進度
+它已通過兩輪審查，但**屬性模型在審查後被改掉**。
+標頭已標為 `Re-review required`，審查記錄已附〈模型改版〉條目與四個重點提示：
 
-- 系統 GDD：**1 / 32 已設計且已審查**（寶石嵌合）
-- 設計順序中已完成：第 5 位
-
-## 傳給下游的硬約束（累計）
-
-1. **敵人須新增「防禦力」概念**（`Armor`、`WeakAttribute`、`ResistAttribute`）
-2. **關卡的敵人抗性 × 挑戰禁用項，須至少留下兩種可行屬性解**
-   ——`game-concept.md` §4.3 的鐵則**不足以**保證可達成性，三星挑戰與關卡進程的 GDD
-   必須自行實作此驗證
-3. 塔僅單槽；基礎塔未嵌合仍可攻擊
-4. 嵌合需付費 `C`（建造費 60%）
-
-## 下一步
-
-**`/design-system 連攜系統`**——設計順序第 6 位，直接依賴寶石嵌合剛定案的五屬性行為，
-也是專案的第一號風險（連攜技能 UI 可讀性）所在。
-
-> 若想先驗證手感而非繼續寫文件，可在連攜系統 GDD 完成後直接跳 `/prototype --spike`，
-> 不必等前 6 份 GDD 全滿。
+1. 相剋環的擴充性（v1.0 擴到 12–15 種時環怎麼辦）— **目前無解答**
+2. 相剋環對每一次塔攻擊都生效，範圍比原本大得多
+3. `AppliedAttribute` 完全覆寫天生屬性的策略後果
+4. 連攜後段階段須早於前段賦予的時效終點
 
 ## 未 commit
 
 ```
+M design/art/art-bible.md
 M design/gdd/game-concept.md
 M design/gdd/gem-socketing.md
 M design/gdd/systems-index.md
 M design/registry/entities.yaml
-?? design/gdd/reviews/gem-socketing-review-log.md
 M production/session-state/active.md
+?? design/gdd/reviews/gem-socketing-review-log.md
 ```
+
+## 下一步
+
+1. **`/design-review design/gdd/gem-socketing.md`**（新 session）— 相剋環改版未經審查
+2. `/design-system 連攜系統`（新 session）— 上游已備妥
+3. `/prototype --spike` — 驗證落點圓與施法模式的手感（風險 #1）
