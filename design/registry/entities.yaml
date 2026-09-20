@@ -10,7 +10,10 @@
 #   - referenced_by = 引用此項目的其他 GDD（不可自行變更值）
 #   - 要改值必須回到 source GDD 修改，並同步檢查所有 referenced_by
 #
-# 最後更新：2026-09-18
+# 最後更新：2026-09-20（gem-socketing.md 兩輪 /design-review 後同步）
+#
+# ⚠️ 已知流程缺口：/design-review 不比對本檔。審查修訂數值後必須手動回來同步，
+#    或補跑 /consistency-check。FusionCost 曾因此漂移（GDD 2 vs 本檔 3）。
 
 version: 1
 
@@ -122,6 +125,15 @@ items:
     source: gem-socketing.md
     referenced_by: []
 
+  - name: ArmorReduction
+    type: formula
+    expression: "min(ArmorReductionCap, EffectiveArmor / ArmorReductionScale)"
+    variables: [EffectiveArmor, ArmorReductionCap, ArmorReductionScale]
+    output_range: "0 – 0.75"
+    note: "design-review 修訂新增。原版本只定義輸出範圍，未定義換算式，導致 FinalDamage 無法被實作"
+    source: gem-socketing.md
+    referenced_by: []
+
   # ─────────────────────────────────────────────
   # 常數（下游 GDD 不可牴觸）
   # ─────────────────────────────────────────────
@@ -181,6 +193,14 @@ items:
     source: gem-socketing.md
     referenced_by: []
 
+  - name: ArmorReductionScale
+    type: constant
+    value: 200
+    unit: K（待原型實測調整，需配合敵人系統 BaseArmor 範圍）
+    note: "ArmorReduction = min(ArmorReductionCap, EffectiveArmor / K)。design-review 修訂新增，補上原本缺失的 EffectiveArmor→ArmorReduction 換算式"
+    source: gem-socketing.md
+    referenced_by: []
+
   - name: FireStackCap
     type: constant
     value: 3
@@ -211,9 +231,9 @@ items:
 
   - name: FusionCost
     type: constant
-    value: 3
+    value: 2
     unit: 顆
-    note: 3 顆同屬性 Lv1 → 1 顆 Lv2（消耗）
+    note: "2 顆同屬性 Lv1 → 1 顆 Lv2（消耗）。design-review 由 3 調降——原值下理性玩家幾乎不會主動融合，且約 6% 玩家整局湊不齊材料"
     source: gem-socketing.md
     referenced_by: []
 

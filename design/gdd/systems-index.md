@@ -274,7 +274,7 @@
 | 1 | 塔系統 | MVP | ⬜ Not Started | — |
 | 7 | 敵人系統 | MVP | ⬜ Not Started | — |
 | 10 | 傷害計算 | MVP | ⬜ Not Started | — |
-| 2 | 寶石嵌合 | MVP ★ | ✅ **Designed**（待審查） | [gem-socketing.md](gem-socketing.md) |
+| 2 | 寶石嵌合 | MVP ★ | ✅ **Reviewed**（兩輪審查通過） | [gem-socketing.md](gem-socketing.md) ｜ [審查記錄](reviews/gem-socketing-review-log.md) |
 | 3 | 連攜系統 | MVP ★ | ⬜ Not Started | — |
 | 4 | 巫師能力 | MVP ★ | ⬜ Not Started | — |
 | 5 | 建造系統 | MVP | ⬜ Not Started | — |
@@ -303,7 +303,7 @@
 | 30 | 渲染擴充 | v1.0 | ⬜ Not Started | — |
 | 31 | 設定系統 | v1.0 | ⬜ Not Started | — |
 
-**進度**：**1 / 32 已設計**（寶石嵌合，待 `/design-review`）
+**進度**：**1 / 32 已設計且已審查**（寶石嵌合）
 
 > 📋 **實體登錄表已建立**：[design/registry/entities.yaml](../registry/entities.yaml)
 > 收錄 5 個寶石、4 個公式、16 個常數。**撰寫後續 GDD 時會自動比對**，
@@ -321,7 +321,7 @@
 | art-bible §8 | 遮擋描邊須用 **URP Render Graph API**（6.3 已移除 Compatibility Mode） | 渲染擴充 |
 | art-bible §7 | 滑鼠控制視角旋轉，**無自由游標**；格子以準星指向並**自動吸附** | 建造系統、輸入、攝影機 |
 | game-concept §3.3 | 提前召喚的獎勵須為**每波固定值**，不可複利累加 | 波次系統 |
-| game-concept §4.3 | 挑戰目標**一律限制型**，不可用要求型 | 三星挑戰 |
+| game-concept §4.3 | 挑戰目標**一律限制型**，不可用要求型。⚠️ **此鐵則僅涵蓋目標本身，不涵蓋敵人抗性佈局**——可達成性須另由下方的關卡驗證規則保證，**不得只依賴本條** | 三星挑戰、關卡與章節進程 |
 | game-concept §3.5 | **天賦樹與技能樹的前置關係不可跨樹**——被動節點的前置只能是被動節點，技能節點的前置只能是技能節點。保留日後拆分的可能性 | 天賦／技能樹 |
 | game-concept §3.2 | 連攜具**方向性**，A→B 與 B→A 為兩個不同技能，資料模型須支援有向鏈路 | 連攜系統 |
 | **gem-socketing** | ⚠️ **敵人須新增「防禦力」概念**（`Armor`、`WeakAttribute`、`ResistAttribute` 三欄位），以支撐蝕的穿甲與屬性剋制 | 敵人系統、傷害計算 |

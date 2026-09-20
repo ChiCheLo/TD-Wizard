@@ -1,48 +1,72 @@
 # Active Session State
 
-> 最後更新：2026-09-18
+> 最後更新：2026-09-20
 
 | 欄位 | 內容 |
 |---|---|
-| **Task** | 寶石嵌合系統 GDD |
-| **Status** | **Complete**（待 `/design-review`） |
-| **File** | `design/gdd/gem-socketing.md`（427 行，12 節全滿） |
-| **Sections** | 全部完成，無殘留佔位符 |
-| **Next** | `/design-review design/gdd/gem-socketing.md`（**須於全新 session 執行**） |
+| **Task** | 寶石嵌合系統 GDD — 審查後修訂與收尾 |
+| **Status** | **Complete**（兩輪 `/design-review` 皆已處理完畢） |
+| **File** | `design/gdd/gem-socketing.md` |
+| **Next** | `/design-system 連攜系統`（設計順序第 6 位，**須於全新 session 執行**） |
 
-## 本次產出
+## 本次處理
 
-| 檔案 | 內容 |
-|---|---|
-| `design/gdd/gem-socketing.md` | 寶石嵌合系統完整 GDD |
-| `design/registry/entities.yaml` | **新建**。5 寶石 + 4 公式 + 16 常數 |
-| `design/gdd/systems-index.md` | 進度 1/32；新增 4 條下游約束、2 個待解問題 |
+第二輪 `/design-review` 的結果（1 項阻擋 + 4 項建議），加上審查未涵蓋但同時發現的
+登錄表漂移，全部處理完畢。
+
+| # | 項目 | 檔案 |
+|---|---|---|
+| 1 | `FusionCost` 3 → 2（登錄表漂移修正） | `design/registry/entities.yaml` |
+| 2 | §4.3 鐵則加入限定：不涵蓋敵人抗性佈局 | `design/gdd/game-concept.md` |
+| 3 | 火的層數驅逐明確定義為**持續重估**（非建立時快照） | `gem-socketing.md` |
+| 4 | 風的「同時」定義為**同一次傷害結算批次** | `gem-socketing.md` |
+| 5 | 新增〈融合的取捨驗算〉——改用正確的對照組 | `gem-socketing.md` |
+| 6 | 新增 3 條 AC（火中途驅逐與遞補、風跨批次） | `gem-socketing.md` |
+| 7 | 建立審查記錄（補記第一、二輪） | `design/gdd/reviews/gem-socketing-review-log.md` |
+| 8 | 進度改為 Reviewed；§8 約束補上 §4.3 的限定 | `design/gdd/systems-index.md` |
+
+## ⚠️ 已知流程缺口（下次審查務必注意）
+
+**`/design-review` 不比對 `design/registry/entities.yaml`。**
+它比對 GDD 與 GDD，不比對 GDD 與 registry。第一輪審查把 `FusionCost` 從 3 改成 2，
+但沒回頭同步登錄表，兩輪之間漂移了整整一份文件的時間。
+
+**審查後的收尾有三步，缺一不可**：
+1. 寫 `design/gdd/reviews/[system]-review-log.md`
+2. 更新 `systems-index.md` §7 狀態與總進度
+3. **同步 `entities.yaml`**（或補跑 `/consistency-check`）
+
+第一輪三步全漏。
 
 ## 進度
 
-- 系統 GDD：**1 / 32**（寶石嵌合）
-- 設計順序中已完成：第 5 位（提前撰寫，因其為內容軸）
+- 系統 GDD：**1 / 32 已設計且已審查**（寶石嵌合）
+- 設計順序中已完成：第 5 位
 
-## 本次確立的關鍵設計
-
-- 塔僅 **1 槽**；**基礎塔未嵌合仍可攻擊**（單體、索敵第一隻、無屬性）
-- 寶石採**實例制**，每顆各持等級；可同時擁有同屬性多顆不同等級
-- 升級採**融合**：3 顆同屬性 Lv1 → 1 顆 Lv2（消耗）
-- 嵌合**需付費 `C`**；準備期取下全額退還、戰鬥期不退還
-- 五屬性行為：火（區域燃燒）、霜（減速場）、雷（跳彈可重複，每跳 −20%）、
-  風（群體擊退，距離隨機不疊加）、蝕（固定第一隻，穿甲下限 25%）
-- 剋制：弱點 ×1.5、抗性 ×0.75，**互斥不同時觸發**
-
-## ⚠️ 傳給下游的硬約束
+## 傳給下游的硬約束（累計）
 
 1. **敵人須新增「防禦力」概念**（`Armor`、`WeakAttribute`、`ResistAttribute`）
-2. **關卡的敵人抗性 × 挑戰禁用項，須至少留下兩種可行屬性解**——否則產生不可達成的星星
+2. **關卡的敵人抗性 × 挑戰禁用項，須至少留下兩種可行屬性解**
+   ——`game-concept.md` §4.3 的鐵則**不足以**保證可達成性，三星挑戰與關卡進程的 GDD
+   必須自行實作此驗證
+3. 塔僅單槽；基礎塔未嵌合仍可攻擊
+4. 嵌合需付費 `C`（建造費 60%）
 
-## 下一個該設計的系統
+## 下一步
 
-依 systems-index §6 設計順序，尚未設計且優先度最高者：
+**`/design-system 連攜系統`**——設計順序第 6 位，直接依賴寶石嵌合剛定案的五屬性行為，
+也是專案的第一號風險（連攜技能 UI 可讀性）所在。
 
-**事件匯流排**（順序第 1 位，L0 基礎層，瓶頸系統）
-或 **連攜系統**（順序第 6 位，★ 高複雜度，第一號風險所在）
+> 若想先驗證手感而非繼續寫文件，可在連攜系統 GDD 完成後直接跳 `/prototype --spike`，
+> 不必等前 6 份 GDD 全滿。
 
-> 建議：連攜系統直接依賴寶石嵌合的屬性定義，趁上下文還熱時撰寫較有效率。
+## 未 commit
+
+```
+M design/gdd/game-concept.md
+M design/gdd/gem-socketing.md
+M design/gdd/systems-index.md
+M design/registry/entities.yaml
+?? design/gdd/reviews/gem-socketing-review-log.md
+M production/session-state/active.md
+```
