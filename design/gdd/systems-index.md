@@ -285,7 +285,7 @@
 | 7 | 敵人系統 | MVP | ⬜ Not Started | — |
 | 10 | 傷害計算 | MVP | ⬜ Not Started | — |
 | 2 | 寶石嵌合 | MVP ★ | ✅ **Approved**（第 4 輪複審通過） | [gem-socketing.md](gem-socketing.md) ｜ [審查記錄](reviews/gem-socketing-review-log.md) |
-| 3 | 連攜系統 | MVP ★ | ⬜ Not Started | — |
+| 3 | 連攜系統 | MVP ★ | 🟡 **Designed**（待 `/design-review`） | [連攜系統.md](連攜系統.md) |
 | 4 | 巫師能力 | MVP ★ | ⬜ Not Started | — |
 | 5 | 建造系統 | MVP | ⬜ Not Started | — |
 | 9 | 波次系統 | MVP | ⬜ Not Started | — |

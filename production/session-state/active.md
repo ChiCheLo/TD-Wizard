@@ -1,12 +1,20 @@
 # Active Session State
 
-> 最後更新：2026-09-20
+> 最後更新：2026-09-21
 
 | 欄位 | 內容 |
 |---|---|
-| **Task** | 寶石嵌合系統 — 第 3 輪審查的修訂 |
-| **Status** | **Complete** — 9 項阻擋修訂、2 項駁回 |
-| **Next** | 複審（新 session）或直接 `/design-system 連攜系統` |
+| **Task** | 連攜系統 GDD |
+| **Current section** | **全部完成**（8 必要章節 + Visual/Audio、UI Requirements、Open Questions）|
+| **File** | design/gdd/連攜系統.md |
+| **已完成章節** | Overview、Player Fantasy、Detailed Design、Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria、Visual/Audio Requirements、UI Requirements、Open Questions（全數完成）|
+| **Registry 更新** | 已寫入 entities.yaml：ChainDetectionRadius、ChainDomainRadius(待定)、ChainSkillCooldown、EmberDuration、ChainDamageMult、ChainSkillDamage、AppliedAttributeDuration_炎寒領域（新增）；CastCircle referenced_by、星星之火 note（更新，含本 session 補充定案的 1.5倍瞄準鏡＋打空仍進CD 機制）|
+| **systems-index 狀態** | 已更新為 🟡 Designed（待 design-review）|
+| **status** | Complete — 等待獨立 session 執行 `/design-review` |
+
+---
+
+## 歷史紀錄（上一個任務）
 
 ## 第 3 輪審查的處置
 

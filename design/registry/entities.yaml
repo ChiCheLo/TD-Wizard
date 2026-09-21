@@ -341,6 +341,73 @@ items:
       領域落點的可釋放範圍。巫師的座標是圓心計算的一部分，因此站位不只決定
       「能不能放」，更決定「能放到哪」。巫師往前走，圓就往前移
     source: game-concept.md
+    referenced_by: [連攜系統.md]
+
+  - name: ChainDetectionRadius
+    type: formula
+    expression: "ChainDetectionRadius = max(AttackRadius_i)，i 為場上目前所有已嵌合寶石的塔"
+    variables: [AttackRadius_i]
+    note: 配方檢查的感應半徑。以巫師座標為圓心蒐集範圍內的塔並依屬性分組
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: ChainDomainRadius
+    type: constant
+    value: "待定（開發期 stub = 3 公尺，非設計定案）"
+    unit: 公尺
+    note: >
+      地面領域固定小徑（適用「炎寒領域」「凍土」），領域大小固定、不隨落點圓縮放。
+      待 /prototype --spike 實測手感後定案，見 Open Questions #1
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: ChainSkillCooldown
+    type: constant
+    value: 30
+    unit: 秒
+    note: MVP 三個連攜技共用同一起點值，各技能CD各自獨立計時；日後平衡時各自獨立調整
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: EmberDuration
+    type: constant
+    value: 8
+    unit: 秒
+    note: >
+      「星星之火」火種標記在未被風屬性攻擊觸發引爆前的存活時間。超時未觸發則火種消失，
+      Phase 2 永不發生。填補 星星之火 條目 phases[0].duration 原標記的「有時限（待定）」
+    source: 連攜系統.md
+    referenced_by: [星星之火]
+
+  - name: ChainDamageMult
+    type: constant
+    value: 0.5
+    unit: 倍率
+    note: >
+      三個 MVP 連攜技共用的巫師傷害貢獻係數（「炎寒領域」火海階段／「凍土」熔岩灼燒／
+      「星星之火」引爆皆套用）。與 gem-socketing 的 WeaknessMult(1.5)／ResistMult(0.75) 疊乘，
+      調整前須注意剋制本身是「調味不是主菜」，份量應直接調整此係數而非疊加剋制倍率
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: ChainSkillDamage
+    type: formula
+    expression: "ChainSkillDamage = WizardBaseDamage × ChainDamageMult"
+    variables: [WizardBaseDamage, ChainDamageMult]
+    note: >
+      三技能共用的巫師傷害貢獻公式。WizardBaseDamage 尚待巫師能力 GDD 定案（Open Questions #2），
+      MVP 為固定值，非成長軸（裝備系統列入 v1.0 後才成長）
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: AppliedAttributeDuration_炎寒領域
+    type: constant
+    value: 4.0
+    unit: 秒
+    note: >
+      「炎寒領域」暴風雪賦予的霜屬性時效——階段1剩餘最長2秒+階段2全長2秒的最差情況。
+      若後段判定時已超過時效，只以敵人原生 BaseAttribute 計算剋制（可能無剋制）
+    source: 連攜系統.md
     referenced_by: []
 
   # ─────────────────────────────────────────────
@@ -414,9 +481,16 @@ items:
       「火種」是獨立標記，**不是 AppliedAttribute**——不寫入屬性欄位，
       故不會讓蝕塔額外吃 ×1.5，也不會覆寫菁英怪的原生屬性。
       階段2 由條件觸發，時間不確定，可能永不觸發（火種過期消失）。
-      ⚠️ 準心不受落點圓約束，是「拿支柱②換支柱①」的刻意交換，見 game-concept §3.2
+      ⚠️ 準心不受落點圓約束，是「拿支柱②換支柱①」的刻意交換，見 game-concept §3.2。
+      ⚠️ 瞄準時視野收窄為基準 FOV 的 1.5 倍放大（類 FPS ADS 瞄準鏡效果，
+      連攜系統.md GDD session 補充定案），區別於落點圓技能（炎寒領域／凍土）
+      的正常視野瞄準——遠距離點燃單一敵人需要這層精確度，其餘技能不套用。
+      **會打空，且打空一樣進CD**：左鍵確認一律正常進入 Windup（與其他連攜技流程一致，
+      不因是否命中而分岐），前搖完成後消耗 CD；hit box 只決定 Phase 1 點燃效果是否生效
+      （未命中則不產生火種標記，Phase 2 永不觸發），沒有免費重試。
+      見 連攜系統.md Visual/Audio Requirements 與 Edge Cases
     source: game-concept.md
-    referenced_by: []
+    referenced_by: [連攜系統.md]
 
 # ─────────────────────────────────────────────
 # 待登錄（其他 GDD 撰寫後補入）
