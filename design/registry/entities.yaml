@@ -344,10 +344,28 @@ items:
     referenced_by: [連攜系統.md]
 
   - name: ChainDetectionRadius
-    type: formula
-    expression: "ChainDetectionRadius = max(AttackRadius_i)，i 為場上目前所有已嵌合寶石的塔"
-    variables: [AttackRadius_i]
-    note: 配方檢查的感應半徑。以巫師座標為圓心蒐集範圍內的塔並依屬性分組
+    type: constant
+    value: 6.0
+    unit: 公尺
+    note: >
+      配方檢查的感應半徑，固定常數（provisional，待 /prototype --spike 驗證）。
+      以巫師座標為圓心、採 XZ 水平距離蒐集範圍內已嵌合的塔並依屬性分組。
+      與塔的射程無關、不隨場上塔配置變動。
+      2026-09-24 修正：原登錄為 max(AttackRadius_i) 動態公式，該版本已於連攜系統第1輪
+      修訂中刪除（理由：零嵌合塔時為空集合的 max、全場範圍使規則不可學習、無法做空間查詢優化）。
+      本登錄先前未同步，持續發布已刪除的公式。
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: ChainDetectionRadiusHysteresis
+    type: constant
+    value: 0.4
+    unit: 公尺
+    note: >
+      感應半徑的遲滯帶（2026-09-24 新增，連攜系統第3輪修訂）。
+      進入判定距離 = ChainDetectionRadius（6.0）；離開判定距離 = 6.0 + 0.4 = 6.4。
+      無遲滯時，玩家在邊界附近巡邏會造成可放性旗標逐幀翻轉、技能列高頻閃爍。
+      屬資料層職責，不可下推給 UI。
     source: 連攜系統.md
     referenced_by: []
 
@@ -379,34 +397,92 @@ items:
     source: 連攜系統.md
     referenced_by: [星星之火]
 
-  - name: ChainDamageMult
+  - name: ChainTickDamageMult
     type: constant
     value: 0.5
     unit: 倍率
     note: >
-      三個 MVP 連攜技共用的巫師傷害貢獻係數（「炎寒領域」火海階段／「凍土」熔岩灼燒／
-      「星星之火」引爆皆套用）。與 gem-socketing 的 WeaknessMult(1.5)／ResistMult(0.75) 疊乘，
+      tick 型連攜技的巫師傷害貢獻係數（「炎寒領域」火海階段／「凍土」熔岩灼燒）。
+      每次 tick 判定各自套用。2026-09-24：由原 ChainDamageMult 拆分而來。
+      與 gem-socketing 的 AffinityMult（剋制 1.5／被剋 0.75）疊乘，
       調整前須注意剋制本身是「調味不是主菜」，份量應直接調整此係數而非疊加剋制倍率
+
+  - name: ChainBurstDamageMult
+    type: constant
+    value: 2.5
+    unit: 倍率
+    note: >
+      爆發型連攜技的巫師傷害貢獻係數（「星星之火」引爆），單次判定即交付全部傷害。
+      2026-09-24 新增（連攜系統第3輪修訂，修正阻擋性缺陷）：
+      原本三技能共用 0.5，但該值是「每次判定」的係數——領域類 2 秒 ÷ 0.5 秒 tick = 4 次判定
+      = 2.0× WizardBaseDamage，星星之火單次判定僅 0.5×，只有 25% 傷害卻同 CD、同配方成本，
+      外加精準瞄準要求、可完全打空、需風塔配合。此為單位錯誤而非平衡問題。
+      2.5 = tick 型等效總量（2.0）+ 打空風險與瞄準要求的溢價。
+      硬性約束：兩係數的「每次施放等效總量」須維持同一量級，單獨調整任一個會重新打開支配關係
     source: 連攜系統.md
     referenced_by: []
 
   - name: ChainSkillDamage
     type: formula
-    expression: "ChainSkillDamage = WizardBaseDamage × ChainDamageMult"
-    variables: [WizardBaseDamage, ChainDamageMult]
+    expression: "ChainSkillDamage = WizardBaseDamage × ChainDamageMult_<型別>"
+    variables: [WizardBaseDamage, ChainTickDamageMult, ChainBurstDamageMult]
     note: >
-      三技能共用的巫師傷害貢獻公式。WizardBaseDamage 尚待巫師能力 GDD 定案（Open Questions #2），
+      巫師傷害貢獻公式。每個技能的策略定義須宣告自己採用 tick 型或爆發型係數，不由形態推導。
+      MVP：炎寒領域＝tick、凍土＝tick、星星之火＝burst。
+      輸出為餵入 gem-socketing FinalDamage 管線的 BaseDamage 輸入值（單次判定），
+      不是每秒傷害、也不是整個階段的總和。LevelMult 對連攜傷害固定為 1.0。
+      WizardBaseDamage 尚待巫師能力 GDD 定案（Open Questions #2），開發期 stub = 20；
+      未給 stub 時 C# 預設值 0 會讓三招連攜靜默零傷害，故強制登記 stub。
       MVP 為固定值，非成長軸（裝備系統列入 v1.0 後才成長）
     source: 連攜系統.md
     referenced_by: []
 
   - name: AppliedAttributeDuration_炎寒領域
     type: constant
-    value: 4.0
+    value: 4.5
     unit: 秒
     note: >
-      「炎寒領域」暴風雪賦予的霜屬性時效——階段1剩餘最長2秒+階段2全長2秒的最差情況。
-      若後段判定時已超過時效，只以敵人原生 BaseAttribute 計算剋制（可能無剋制）
+      「炎寒領域」暴風雪賦予的霜屬性時效 = 階段1剩餘最長2秒 + 階段2全長2秒 + 0.5秒安全邊際。
+      時效判定為左閉右開：t < 4.5 有效、t = 4.5 已過期（與 gem-socketing「倒數至0即回歸
+      BaseAttribute」一致）。安全邊際確保最後一次判定（≤4.0秒）遠離邊界。
+      若判定時已超過時效，只以敵人原生 BaseAttribute 計算剋制（可能無剋制）。
+      2026-09-24 修正：原登錄 4.0 秒，正是連攜系統文件自身判定的「臨界失敗值」
+      （階段2最後一次判定恰好等於時效終點，剛好吃不到剋制）。本登錄先前未同步。
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: ShortStunDuration
+    type: constant
+    value: 1.0
+    unit: 秒
+    note: >
+      前搖被打斷後的短僵直時長（provisional，MVP 三技能共用起點值）。
+      2026-09-24 新增登錄。由 0.5 秒上調以對齊 art-bible §5 踉蹌動畫規格
+      （約 1 秒的「失衡→回正」完整弧線）——0.5 秒會讓動畫在回正前被腰斬。
+      不可重入：僵直期間再次受擊不延長、不重置（連攜系統規則13）。
+    source: 連攜系統.md
+    referenced_by: [art-bible.md]
+
+  - name: MaxActiveDuration
+    type: constant
+    value: "逐技能宣告（星星之火 8.5／炎寒領域 4.5／凍土 4.5，皆為開發期 stub）"
+    unit: 秒
+    note: >
+      效果實例的強制退出上限（2026-09-24 新增登錄）。自效果實例生成起算，
+      經過此秒數後無論階段是否推進完畢皆強制結束。
+      硬性不變式：MaxActiveDuration < 該技能的 ChainSkillCooldown
+      （否則同一技能可能出現兩個時間重疊的效果實例）。
+    source: 連攜系統.md
+    referenced_by: []
+
+  - name: PhaseTickInterval
+    type: constant
+    value: 0.5
+    unit: 秒
+    note: >
+      領域類效果的傷害判定頻率（逐技能宣告，此為 MVP stub 值；2026-09-24 新增登錄）。
+      是 ChainTickDamageMult 平衡推理的必要前提——同一倍率配 0.25 秒與配 1.0 秒 tick，
+      總傷害差 4 倍。
     source: 連攜系統.md
     referenced_by: []
 

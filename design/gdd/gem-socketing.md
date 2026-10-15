@@ -1,8 +1,14 @@
 # 寶石嵌合系統 — Gem Socketing
 
-> **Status**: **Revised** — 第 3 輪審查的阻擋性項目已全數處理（含 2 項駁回，理由見審查記錄）
+> **Status**: ⚠️ **Approved — 待複審**（2026-09-24：Core Rule 3 由四項擴為五項，新增「射程」）
 > **Author**: 開發者 + Claude
-> **Last Updated**: 2026-09-20
+> **Last Updated**: 2026-09-24
+>
+> ⚠️ **2026-09-24 對已核准內容的修改**（來源：`/design-review design/gdd/連攜系統.md` 第 3 輪，使用者核准）：
+> Core Rule 3 新增第五項「射程」，`ISocketableTower` 新增 `AttackRadius`。
+> **此變更尚未經過 `/design-review` 複審**——須確認它未波及本文件其他推論
+> （特別是屬性規格表、基礎塔規格、平衡假設與相關 AC）。在複審通過前，
+> 本文件的 Approved 狀態僅適用於未受此變更影響的部分。
 > **Implements Pillar**: ④ 一種塔，無限組合（主要）｜① 配置勝於操作
 > **審查記錄**: [reviews/gem-socketing-review-log.md](reviews/gem-socketing-review-log.md)
 >
@@ -60,8 +66,16 @@
 1. **每座塔有且僅有一個寶石插槽。**
 2. **基礎塔（未嵌合）具備攻擊能力**：通用單體攻擊、索敵「第一隻」、基準攻速、
    **無屬性**（不觸發剋制，也不受被剋影響）。
-3. **嵌入寶石後，寶石完全接管四項特性**：攻擊機制、索敵邏輯、攻速、屬性標籤。
+3. **嵌入寶石後，寶石完全接管五項特性**：攻擊機制、索敵邏輯、攻速、**射程**、屬性標籤。
    基礎攻擊被**取代**，非疊加。
+   > 📌 **「射程」為 2026-09-24 新增的第五項**（來源：`/design-review design/gdd/連攜系統.md` 第 3 輪，使用者核准）。
+   > 原版本只列四項且不含射程，暗示射程可能是塔層級常數。但連攜系統的落點圓
+   > （`CastCircle` 半徑 ＝ 參與塔中射程最長者）與其規則4「篩選較近的塔不必然縮小圓半徑」
+   > 的整段設計意圖，都建立在「射程逐寶石決定」之上；若射程為塔層級常數，
+   > 落點圓半徑將恆定不變，該設計意圖與 game-concept §3.2 的落點圓定義會一併失效。
+   > 落點圓是本專案標記的**第一號風險**系統，不應建立在一個被抽空的變數上，故在此裁決為逐寶石決定。
+   > **連帶**：`ISocketableTower` 須暴露 `float AttackRadius { get; }`（須 > 0，見介面契約）；
+   > 下方基礎塔規格表與屬性規格表須補上射程欄（數值待原型實測，見 Open Questions）。
 4. **索敵邏輯內建於屬性，玩家不可切換。** 不提供「打最前／最後／最強」的手動設定。
 5. **寶石採實例制。** 每顆寶石是獨立物件，各自持有等級。
    可同時擁有同屬性多顆不同等級的寶石。
@@ -271,7 +285,12 @@ interface ISocketableTower
     GemInstance? CurrentGem { get; }       // null = 未嵌合（Empty 狀態）
     bool TrySocket(GemInstance gem);       // false = 槽位已佔用，呼叫前須先 Unsocket
     GemInstance? Unsocket();               // 回傳被取下的寶石，Empty 狀態時回傳 null
-    BaseAttackSpec BaseAttack { get; }      // 基礎攻擊規格（單體、索敵第一隻、基準攻速、無屬性）
+    BaseAttackSpec BaseAttack { get; }      // 基礎攻擊規格（單體、索敵第一隻、基準攻速、基準射程、無屬性）
+
+    // 2026-09-24 新增（來源：/design-review 連攜系統 第3輪，Core Rule 3 擴為五項）
+    // 已嵌合時 = 該寶石宣告的射程；未嵌合時 = 基礎塔的基準射程。須恆 > 0
+    // 連攜系統的 CastCircle 半徑 = max(參與塔 AttackRadius)，依賴此欄位
+    float AttackRadius { get; }
 }
 
 // 傷害計算／連攜系統須提供

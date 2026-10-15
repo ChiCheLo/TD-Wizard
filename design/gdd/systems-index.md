@@ -284,8 +284,8 @@
 | 1 | 塔系統 | MVP | ⬜ Not Started | — |
 | 7 | 敵人系統 | MVP | ⬜ Not Started | — |
 | 10 | 傷害計算 | MVP | ⬜ Not Started | — |
-| 2 | 寶石嵌合 | MVP ★ | ✅ **Approved**（第 4 輪複審通過） | [gem-socketing.md](gem-socketing.md) ｜ [審查記錄](reviews/gem-socketing-review-log.md) |
-| 3 | 連攜系統 | MVP ★ | 🟡 **Designed**（待 `/design-review`） | [連攜系統.md](連攜系統.md) |
+| 2 | 寶石嵌合 | MVP ★ | ⚠️ **Approved — 待複審**（2026-09-24：Core Rule 3 由四項擴為五項，新增「射程」；`ISocketableTower` 新增 `AttackRadius`。來源：連攜系統第 3 輪 review，使用者核准） | [gem-socketing.md](gem-socketing.md) ｜ [審查記錄](reviews/gem-socketing-review-log.md) |
+| 3 | 連攜系統 | MVP ★ | 🟠 **Revised — 待原型驗證**（2026-09-24 第 3 輪 `/design-review`：NEEDS REVISION，11 項已修訂；senior 判定文件在發散，**下一步為 `/prototype --spike` 而非第 4 輪 review**） | [連攜系統.md](連攜系統.md) ｜ [審查記錄](reviews/連攜系統-review-log.md) |
 | 4 | 巫師能力 | MVP ★ | ⬜ Not Started | — |
 | 5 | 建造系統 | MVP | ⬜ Not Started | — |
 | 9 | 波次系統 | MVP | ⬜ Not Started | — |
@@ -313,7 +313,9 @@
 | 30 | 渲染擴充 | v1.0 | ⬜ Not Started | — |
 | 31 | 設定系統 | v1.0 | ⬜ Not Started | — |
 
-**進度**：**1 / 34 已通過審查**。寶石嵌合已完成第 4 輪複審，Verdict: APPROVED。
+**進度**：**0 / 34 處於無條件通過狀態**（2026-09-24 更新）。寶石嵌合先前為唯一 Approved，但其 Core Rule 3 已於連攜系統第 3 輪 review 中修改（新增「射程」為第五項接管特性），狀態改為「待複審」；連攜系統完成第 3 輪修訂，待原型驗證。
+
+> ⚠️ **2026-09-24 的連鎖影響**：連攜系統第 3 輪 review 裁決「射程逐寶石決定」，這是對已核准文件的修改。兩份文件現在都需要動作——gem-socketing 需一輪複審確認變更未波及其他推論，連攜系統需 `/prototype --spike` 驗證手感。**建議先跑原型再複審**：原型可能改變數個 provisional 值，複審應該審最終值而非 stub。
 
 > ⚠️ **徽章與敘述必須同步**。第 3 輪審查發現本表的徽章仍寫「已審查通過」而下方敘述寫「須重新審查」，
 > 只掃表格的人會誤判此系統免審。**改狀態時兩處一起改。**

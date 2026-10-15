@@ -59,3 +59,16 @@ crashlytics-build.properties
 
 # Claude Code — 本機專屬設定（CLAUDE.md 與 .claude/docs/ 仍須版控）
 .claude/settings.local.json
+
+# ──────────────────────────────────────────────────────────────
+# 拋棄式原型 — 可刪除，不納入版控
+#
+# Assets/_Prototype/ 底下全部是 spike／prototype 的拋棄式程式碼。
+# 依 /prototype skill 的硬性約束：原型程式碼永遠不會被重構進正式版，
+# 正式實作一律從零重寫。因此程式碼本身是消耗品，不需要版控歷史。
+#
+# ⚠️ 真正的產出是結論，留在 prototypes/*/SPIKE-NOTE.md（**有**版控）。
+# ⚠️ 這也表示：刪掉 Assets/_Prototype/ 之後就救不回來了，這是刻意的。
+# ──────────────────────────────────────────────────────────────
+/[Aa]ssets/_[Pp]rototype/
+/[Aa]ssets/_[Pp]rototype.meta
