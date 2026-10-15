@@ -1,117 +1,48 @@
 # Active Session State
 
-> 最後更新：2026-09-21
+> 最後更新：2026-10-15
 
 | 欄位 | 內容 |
 |---|---|
-| **Task** | 連攜系統 GDD |
-| **Current section** | **全部完成**（8 必要章節 + Visual/Audio、UI Requirements、Open Questions）|
-| **File** | design/gdd/連攜系統.md |
-| **已完成章節** | Overview、Player Fantasy、Detailed Design、Formulas、Edge Cases、Dependencies、Tuning Knobs、Acceptance Criteria、Visual/Audio Requirements、UI Requirements、Open Questions（全數完成）|
-| **Registry 更新** | 已寫入 entities.yaml：ChainDetectionRadius、ChainDomainRadius(待定)、ChainSkillCooldown、EmberDuration、ChainDamageMult、ChainSkillDamage、AppliedAttributeDuration_炎寒領域（新增）；CastCircle referenced_by、星星之火 note（更新，含本 session 補充定案的 1.5倍瞄準鏡＋打空仍進CD 機制）|
-| **systems-index 狀態** | 已更新為 🟡 Designed（待 design-review）|
-| **status** | Complete — 等待獨立 session 執行 `/design-review` |
+| **Task** | `/prototype --spike` — 連攜系統施法手感 |
+| **Phase** | Build 完成，**等待使用者在 Unity 執行並回報** |
+| **Spike 問題** | 巫師能否在 1 秒內完成「進入施法模式 → 讀落點圓 → 確認」，且受擊即取消不會讓連攜在怪群壓力下變成放不出來的技能？ |
+| **Path** | Engine（Unity 6000.3.16f1 / URP），第三人稱 only |
+| **程式碼位置** | `Assets/_Prototype/ChainCastSpike/`（可刪除，見刪除清單） |
+| **紀錄位置** | `prototypes/連攜-castfeel-spike-2026-10-15/` |
+| **關鍵數字** | 停留時間 **p90 是否 ≤ 1.0 秒**（game-concept §3.2 硬性約束） |
 
----
+## 執行方式
 
-## 歷史紀錄（上一個任務）
+1. Unity 建空場景，存成 `Assets/_Prototype/SpikeChainCast.unity`
+2. 刪掉預設的 Main Camera 與 Directional Light（bootstrap 會自己生）
+3. 建空 GameObject → Add Component → `SpikeSceneBootstrap`
+4. 按 Play
 
-## 第 3 輪審查的處置
+操作：WASD 移動／滑鼠視角／**Q** 施法模式／**左鍵** 確認／**K** 殺參與塔／**F1** 輸出結果／**Esc** 放開滑鼠
 
-11 項阻擋中，**2 項駁回**（前提有誤）、1 項降級（可直接證明）、9 項修訂。
+## Scope（已向使用者確認）
 
-**駁回 1｜「剋制環偷偷擴大成每次攻擊生效」**——舊模型也是每次攻擊生效。
-改的是結構不是範圍。這是整份審查的核心論點與 producer 摘要的基礎，但它不成立。
+1. 會動的巫師 ＋ 固定兩座塔（6.0 進／6.4 出遲滯）
+2. 完整施法狀態機（Aiming／Windup 0.3s／ShortStun 1.0s／四種取消）
+3. 壓力源敵人 ＋ 停留時間量測
 
-**駁回 2｜「`C` 的 flat fee 結構問題」**——本作只有一種塔（反支柱②），
-不存在價格階梯；且 `C` 是建造費的 60%，本來就是比例。
+**不做**：寶石屬性、傷害計算、凍土／星星之火、真 30 秒 CD、階段推進、搶佔、第一人稱、美術。
 
-**降級｜「融合能否發生未經驗證」**——鴿籠原理直接證明：12 顆分進 5 種屬性，
-必然有某種達到 2 顆門檻。材料湊得齊是數學保證。
+## 刻意偏離 GDD
 
-> ⚠️ **但 3 項機械性缺失全部屬實**：登錄表舊值 0.5625、systems-index 徽章矛盾、
-> art-bible 殘留舊模型語言。這正是撰寫者最容易漏的類型，審查的價值在此。
+| 項目 | GDD | spike | 理由 |
+|---|---|---|---|
+| `ChainSkillCooldown` | 30 秒 | 2 秒 | 30 秒每次才一個樣本，蒐不到分佈。不在驗證 CD 手感 |
 
-## 本輪新增的兩項定案
+## 上一個任務（已完成）
 
-1. **屬性暴露率：多數敵人 `BaseAttribute = null`，約三成持有屬性**
-   （特殊怪／菁英／頭目）。屬性成為事件而非背景噪音，也大幅降低死局風險。
-2. **剋制是調味，不是主菜。** 期望倍率僅 +5%（1.5 與 0.75 幾乎抵銷）。
-   寶石的價值在**接管攻擊機制**，不在倍率。相剋環存在是為了支撐連攜的染色 combo。
-   **明文禁止**為了「讓剋制更有感」而調高 `WeaknessMult`。
+`/design-review design/gdd/連攜系統.md` 第 3 輪 — Verdict: NEEDS REVISION，11 項已修訂。
+連帶把 gem-socketing 的 Core Rule 3 由四項改為五項（新增射程），該文件狀態已改為
+**Approved — 待複審**。審查記錄：`design/gdd/reviews/連攜系統-review-log.md`。
 
-## ⚠️ 仍卡在上游的一項
+## 這個 spike 之後
 
-**傷害計算系統須定義中央結算調度器。** 火的疊層驅逐與風的「同批次只套用一次」
-都依賴明確的批次邊界，而 Unity 不保證執行順序。在該 GDD 存在前，
-這兩條規則**連可信的 stub 都寫不出來**。已登記於 systems-index §8。
-
----
-
-## 為什麼要改上游
-
-連攜系統的機制在設計討論中確立，結果**推翻了兩份已定案文件的核心模型**：
-
-1. **連攜不是鏈路** — 塔是**配方材料**，效果落在準心指定區域生成的**領域**。
-   不存在「起點塔 → 巫師 → 終點塔」的有向光帶。
-2. **屬性剋制改為五屬性相剋環** — 取代敵人各自持有的天生弱點／抗性。
-
-`/design-system` 會把 game-concept、systems-index、entities.yaml 當成已定案事實讀入。
-不先改乾淨，寫出來的連攜 GDD 會建立在錯的前提上。
-
-## 已確認的連攜設計（11 項）
-
-| # | 項目 | 決定 |
-|---|---|---|
-| 1 | 模型 | 塔是**材料**，效果落在準心指定區域。**不是鏈路** |
-| 2 | 方向性 | ＝**順序**。起點屬性先發生，終點屬性後發生 |
-| 3 | 施放條件 | 範圍內有配方要求的塔 |
-| 4 | 塔的數量 | **固定數量要求**；MVP 配方全用 ×1 |
-| 5 | 屬性 | **五屬性相剋環** `火→霜→雷→風→蝕→火`，取代天生弱點／抗性 |
-| 6 | 落點圓 | 圓心＝參與塔與巫師的幾何中點；半徑＝射程最長塔的攻擊半徑 |
-| 7 | 施法模式 | 按技能進入，不能動；移動取消、受擊取消，皆無代價 |
-| 8 | 前搖 | 確認後 0.3 秒可被打斷 → **短僵直，不進 CD** |
-| 9 | 霸體 | 前搖後不可打斷 |
-| 10 | 巫師傷害 | MVP 固定常數；**裝備系統列入 v1.0** |
-| 11 | 技能樹 | 可重複投點的「連攜精通」節點，每級小幅 % |
-
-MVP 範例技能「炎寒領域」（火 → 霜）：暴風雪 2 秒賦予霜屬性 → 火海 2 秒以火剋霜打剋制傷害，
-外加巫師基本傷害的一定 %數。
-
-## 本次改動的五份文件
-
-| 檔案 | 改了什麼 |
-|---|---|
-| `game-concept.md` | §3.1 核心循環（站位的兩層意義）、**§3.2 連攜整段重寫**、§3.5 新增可疊加節點例外、§10 MVP 規格、§11 裝備進 v1.0 |
-| `gem-socketing.md` | 新增〈屬性相剋環〉章節、介面契約改寫、Edge Cases 改寫、術語統一（弱點／抗性 → 剋制／被剋） |
-| `art-bible.md` | **§7 連攜提示整段重寫**（鏈路預覽作廢 → 落點圓）、§2 Peak 範圍澄清、§5 姿態庫新增施法模式與被打斷、亮度階層改寫 |
-| `entities.yaml` | 新增 `AffinityRing` 與 4 筆連攜常數、倍率 note 改寫、待登錄清單更新 |
-| `systems-index.md` | 32 → **34 系統**（新增動畫系統 #33、裝備系統 #34）、#3 與 #21 描述重寫、§8 新增 6 條約束、§9 新增 3 個待解問題 |
-
-## ⚠️ gem-socketing 需要重新審查
-
-它已通過兩輪審查，但**屬性模型在審查後被改掉**。
-標頭已標為 `Re-review required`，審查記錄已附〈模型改版〉條目與四個重點提示：
-
-1. 相剋環的擴充性（v1.0 擴到 12–15 種時環怎麼辦）— **目前無解答**
-2. 相剋環對每一次塔攻擊都生效，範圍比原本大得多
-3. `AppliedAttribute` 完全覆寫天生屬性的策略後果
-4. 連攜後段階段須早於前段賦予的時效終點
-
-## 未 commit
-
-```
-M design/art/art-bible.md
-M design/gdd/game-concept.md
-M design/gdd/gem-socketing.md
-M design/gdd/systems-index.md
-M design/registry/entities.yaml
-M production/session-state/active.md
-?? design/gdd/reviews/gem-socketing-review-log.md
-```
-
-## 下一步
-
-1. **`/design-review design/gdd/gem-socketing.md`**（新 session）— 相剋環改版未經審查
-2. `/design-system 連攜系統`（新 session）— 上游已備妥
-3. `/prototype --spike` — 驗證落點圓與施法模式的手感（風險 #1）
+1. 依結果更新 `design/gdd/連攜系統.md`（Open Questions #3／#14／#15／#16 的 provisional 值）
+2. `/design-review design/gdd/gem-socketing.md` — Core Rule 3 變更待複審
+3. 第一人稱載體的第二個 spike（本次刻意排除）
